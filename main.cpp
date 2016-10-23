@@ -40,13 +40,17 @@ using namespace std;
 // TODO: improve function by showing the cursor on the selected digit when in edit mode
 void drawSection(MenuController& controller) {
 	// controller.onPreDraw();
-
 	const char* separator = "------------------------------";
+	char buf[64];
+
+	uint8_t size;
+	auto nav_ctrl = controller.getNavCtrl();
+	auto items = nav_ctrl.getVisible(&size);
+
+	cout << "Page: " << (int) nav_ctrl.getPosition() << " / " << (int) nav_ctrl.getPages() << endl;
+
 	cout << separator << endl;
 
-	char buf[64];
-	uint8_t size;
-	auto items = controller.getVisibleItems(&size);
 	for (int i = 0; i < size; i++) {
 		const AbstractMenuItem* item = items[i];
 		item->getInfoString(buf, sizeof(buf));

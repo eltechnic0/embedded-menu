@@ -94,11 +94,9 @@ public:
 
 class MenuNavByPages {
 	class MenuController& ctrl_;
-	// AbstractMenuItem* first_;
-	// AbstractMenuItem* last_;
 	uint8_t first_idx_;
 	uint8_t last_idx_;
-	const uint8_t visible_;
+	const uint8_t visible_;		// items per page
 private:
 	// set first and last pointers according to page number and size
 	void changePage(uint8_t page);
@@ -110,16 +108,13 @@ public:
 	void onSectionUp();
 	void onMoveDown();
 	void onMoveUp();
-	// AbstractMenuItem* getFirst() { return first_; }
-	// AbstractMenuItem* getLast() { return last_; }
-	// AbstractMenuItem** getVisible() { return &first_; }
-	AbstractMenuItem** getVisible(uint8_t* size);
+	const AbstractMenuItem* const * getVisible(uint8_t* size) const;
 	/** Max number of positions -- the number of pages */
-	// NOTE: not sure about this
-	// uint8_t getCount() { return (last_ - first_)/sizeof(AbstractMenuItem); }
-	uint8_t getCount() { return last_idx_ - first_idx_; }
+	uint8_t getCount() const { return last_idx_ - first_idx_; }
 	/** Current position in the count -- the page */
-	uint8_t getPosition();
+	uint8_t getPosition() const;
+	/** Total number of pages */
+	uint8_t getPages() const;
 };
 
 //=============================================================================
@@ -169,7 +164,7 @@ public:
 	// MenuController(IMenuFactory& menu, EventQueue& event_queue)
 	// 	: menu_(menu), event_queue_(event_queue) { }
 	MenuController(MenuFactory& menu)
-		: menu_(menu), section_(menu.createRoot()), nav_ctrl_{*this, 5} {
+		: menu_(menu), section_(menu.createRoot()), nav_ctrl_{*this, 2} {
 		path_.section_id[0] = section_->getId();
 	}
 	~MenuController();
@@ -184,9 +179,7 @@ public:
 	const AbstractMenuItem* const * getItems() { return section_->getItems(); }
 	uint8_t getCurrentIndex() { return path_.item_idx[path_.level]; }
 	const AbstractMenuItem* getCurrentItem() { return getCurrentItem_(); }
-	// const AbstractMenuItem* getFirstVisible() { return nav_ctrl_.getFirst(); }
-	// const AbstractMenuItem* getLastVisible() { return nav_ctrl_.getLast(); }
-	const AbstractMenuItem* const * getVisibleItems(uint8_t* size) { return nav_ctrl_.getVisible(size); }
+	const MenuNavByPages& getNavCtrl() { return nav_ctrl_; };
 	const Path& getPath() { return path_; }
 	StateInfo& getStateInfo() { return state_; }
 };
@@ -200,17 +193,6 @@ inline MenuNavByPages::MenuNavByPages(MenuController& ctrl, uint8_t visible)
 	changePage(0);
 }
 
-// inline void MenuNavByPages::changePage(uint8_t page) {
-// 	uint8_t first_idx = page * visible_;
-// 	first_ = ctrl_.section_->getItems()[first_idx];
-
-// 	uint8_t size = ctrl_.section_->getSize();
-// 	uint8_t last_idx = first_idx + visible_;
-// 	last_idx = last_idx < size ? last_idx : size;
-
-// 	last_ = ctrl_.section_->getItems()[last_idx];
-// }
-
 inline void MenuNavByPages::changePage(uint8_t page) {
 	first_idx_ = page * visible_;
 
@@ -219,7 +201,7 @@ inline void MenuNavByPages::changePage(uint8_t page) {
 	last_idx_ = last_idx_ < size ? last_idx_ : size;
 }
 
-inline AbstractMenuItem** MenuNavByPages::getVisible(uint8_t* size) {
+inline const AbstractMenuItem* const * MenuNavByPages::getVisible(uint8_t* size) const {
 	*size = getCount();
 	// return (&(ctrl_.section_->getItems()[ctrl_.getCurrentIndex() / visible_]));
 	return &(ctrl_.section_->getItems()[first_idx_]);
@@ -270,8 +252,14 @@ inline void MenuNavByPages::onMoveUp() {
 }
 
 /** Current position in the count -- the page */
-inline uint8_t MenuNavByPages::getPosition() {
-	return ctrl_.getCurrentIndex() / visible_;
+inline uint8_t MenuNavByPages::getPosition() const {
+	return ctrl_.getCurrentIndex() / visible_ + 1;
+}
+
+/** Total number of pages */
+inline uint8_t MenuNavByPages::getPages() const {
+	// approximation of ceil(size/visible) with integer division
+	return (ctrl_.section_->getSize() + visible_ - 1) / visible_;
 }
 
 #endif /* MENU_CONTROLLER_H */
