@@ -34,7 +34,7 @@ There are 4 types of editable menu items which are used in the definition of
 menu sections:
 
 - `IntegerMenuItem`: for items holding editable integer values: `uint8_t`,
-`int32_t`, etc. The range of
+`int32_t`, etc.
 
 - `DecimalMenuItem`: same as the previous but for floating point types.
 
@@ -64,7 +64,7 @@ after a change of section, for example.
 
 For similar reasons, there is a class for controlling the way the items arrange
 as the selection moves along the list of items. This functionality is very
-coupled to that of the GUI so separating the completely is difficult. Currently
+coupled to that of the GUI so separating them completely is difficult. Currently
 there is the class `MenuNavByPages`, which is intended to be used with a GUI
 controller that displays a number of items in the screen until the cursor moves
 past the top or bottom. A different type of menu movement could be a scrolling
@@ -74,8 +74,7 @@ to override some functions of the menu controller class with those of the chosen
 navigation implementation, probably by means of C++ templates, and guaranteeing
 that different navigation methods are easily interchangeable without unwanted
 side effects. As of now however, this is unfinished and therefore still tightly
-coupled, so the only navigation method available is by pages (and not well
-tested yet).
+coupled, so the only navigation method available is by pages.
 
 ## Testing the menu on the PC
 

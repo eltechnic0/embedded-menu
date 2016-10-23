@@ -131,6 +131,7 @@ protected:
     void *data_;
 private:
     const uint16_t value_id_;
+    // Whether the value is editable digit-wise and therefore a cursor must be shown.
     const bool cursor_;
     OnStartEditF& onStartEdit_;
     OnEndEditF& onEndEdit_;
